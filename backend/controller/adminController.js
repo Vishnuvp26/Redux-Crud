@@ -103,6 +103,7 @@ const updateUser = async (req, res) => {
         const user = await User.findById(req.params.id);
 
         if (user) {
+            // Update basic fields
             user.name = name || user.name;
             user.email = email || user.email;
             user.isAdmin = isAdmin !== undefined ? isAdmin : user.isAdmin;
@@ -111,6 +112,12 @@ const updateUser = async (req, res) => {
             if (password) {
                 const salt = await bcrypt.genSalt(10);
                 user.password = await bcrypt.hash(password, salt);
+            }
+
+            // Handle image upload if a file is provided
+            if (req.file) {
+                const imageUrl = `/uploads/${req.file.filename}`;
+                user.imageUrl = imageUrl;
             }
 
             const updatedUser = await user.save();
@@ -122,6 +129,7 @@ const updateUser = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // @desc Delete a user
 // @route DELETE /api/admin/users/:id

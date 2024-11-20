@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Thunks for handling user login, registration, and profile updates
 export const registerUser = createAsyncThunk(
     'user/registerUser',
     async (userData, { rejectWithValue }) => {
@@ -56,13 +55,15 @@ export const editUser = createAsyncThunk(
 );
 
 // User Slice
+const initialState = {
+    userInfo: JSON.parse(localStorage.getItem('userInfo')) || null,
+    loading: false,
+    error: null,
+};
+
 const userSlice = createSlice({
     name: 'user',
-    initialState: {
-        userInfo: null,
-        loading: false,
-        error: null,
-    },
+    initialState,
     reducers: {
         resetError: (state) => {
             state.error = null;
@@ -76,6 +77,7 @@ const userSlice = createSlice({
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.userInfo = action.payload;
+                localStorage.setItem('userInfo', JSON.stringify(action.payload));
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -87,6 +89,7 @@ const userSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.userInfo = action.payload;
+                localStorage.setItem('userInfo', JSON.stringify(action.payload));
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
@@ -94,6 +97,7 @@ const userSlice = createSlice({
             })
             .addCase(logoutUser.fulfilled, (state) => {
                 state.userInfo = null;
+                localStorage.removeItem('userInfo');
             })
             .addCase(editUser.pending, (state) => {
                 state.loading = true;
@@ -101,6 +105,7 @@ const userSlice = createSlice({
             .addCase(editUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.userInfo = action.payload;
+                localStorage.setItem('userInfo', JSON.stringify(action.payload));
             })
             .addCase(editUser.rejected, (state, action) => {
                 state.loading = false;

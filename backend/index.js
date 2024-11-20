@@ -3,8 +3,10 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import mongoose from 'mongoose';
 import cors from "cors";
+import path from "path";
 import userRoutes from "./routes/userRouter.js";
 import adminRoutes from './routes/adminRouter.js'
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -24,6 +26,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);

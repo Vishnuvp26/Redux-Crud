@@ -55,10 +55,12 @@ const loginUser = async (req, res) => {
             });
 
             res.status(200).json({
+                message: "Registration successful!",
                 _id: user.id,
                 name: user.name,
                 email: user.email,
                 isAdmin: user.isAdmin,
+                imageUrl: user.imageUrl,
             });
         } else {
             res.status(401).json({ message: "Invalid email or password" });
@@ -86,6 +88,7 @@ const editUser = async (req, res) => {
         }
 
         if (req.file) {
+            console.log('Req.files : ', req.file);
             user.imageUrl = `/uploads/${req.file.filename}`;
         }
 
