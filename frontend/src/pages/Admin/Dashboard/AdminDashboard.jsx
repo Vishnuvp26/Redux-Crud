@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers, logoutAdmin, editUser, deleteUser, createUser } from '../../../features/adminSlice';
 import { useNavigate } from 'react-router-dom';
+import { toast, Toaster } from 'react-hot-toast';
 
 const AdminDashboard = () => {
     const dispatch = useDispatch();
@@ -55,15 +56,35 @@ const AdminDashboard = () => {
         setNewUser((prev) => ({ ...prev, [name]: value }));
     };
 
+    const nameRegex = /^[A-Za-z][A-Za-z0-9]{3,}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const passwordRegex = /^(?=.*[A-Za-z0-9!@#$%^&*()_+=\[\]{};:"\\|,.<>/?-]).{6,}$/;
+
     const handleAddUser = () => {
         if (!newUser.name || !newUser.email || !newUser.password) {
-            alert('All fields are required.');
+            toast.error('All fields are required.');
             return;
         }
+    
+        if (!nameRegex.test(newUser.name)) {
+            toast.error('Enter a valid name more than 3 characters');
+            return;
+        }
+    
+        if (!emailRegex.test(newUser.email)) {
+            toast.error('Enter a valid email address!');
+            return;
+        }
+    
+        if (!passwordRegex.test(newUser.password)) {
+            toast.error("Password must be at least 6 characters long and must not contain spaces.");
+            return;
+        }
+    
         dispatch(createUser(newUser));
         setIsAddModalOpen(false);
         setNewUser({ name: '', email: '', password: '' });
-    };
+    };    
 
     const filteredUsers = users.filter((user) =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -267,6 +288,7 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             )}
+            <Toaster position="bottom-right" reverseOrder={false} />
         </div>
     );
 };

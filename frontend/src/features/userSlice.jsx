@@ -7,13 +7,13 @@ export const registerUser = createAsyncThunk(
         try {
             const response = await axios.post('http://localhost:3000/api/users/register', userData, { withCredentials: true });
             return response.data;
-        } catch (error) {
+        } catch (error) {   
             return rejectWithValue(error.response.data.message);
         }
     }
 );
 
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk(  
     'user/loginUser',
     async (userData, { rejectWithValue }) => {
         try {
@@ -76,8 +76,8 @@ const userSlice = createSlice({
             })
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.userInfo = action.payload;
-                localStorage.setItem('userInfo', JSON.stringify(action.payload));
+                state.userInfo = null;
+                // localStorage.setItem('userInfo', JSON.stringify(action.payload));
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -115,4 +115,4 @@ const userSlice = createSlice({
 });
 
 export const { resetError } = userSlice.actions;
-export default userSlice.reducer;   
+export default userSlice.reducer;

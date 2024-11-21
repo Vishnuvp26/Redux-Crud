@@ -5,12 +5,14 @@ import Home from './pages/User/Home/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLogin from './pages/Admin/Login/AdminLogin';
 import AdminDashboard from './pages/Admin/Dashboard/AdminDashboard';
+import Register from './pages/User/Register/Register';
 
 function App() {
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<Login />} />
+                <Route path="/register" element={<Register/>} />
                 <Route 
                     path="/home" 
                     element={

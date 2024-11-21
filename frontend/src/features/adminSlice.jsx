@@ -33,7 +33,8 @@ export const editUser = createAsyncThunk(
     'admin/editUser',
     async ({ id, userData }, { rejectWithValue }) => {
         try {
-            const response = await axios.put(`http://localhost:3000/api/admin/users/${id}`, userData, { withCredentials: true });
+            const response = await axios.put(`http://localhost:3000/api/admin/users/${id}`, userData,
+                { withCredentials: true });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data.message);
