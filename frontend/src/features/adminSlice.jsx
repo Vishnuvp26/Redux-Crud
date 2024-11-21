@@ -41,6 +41,19 @@ export const editUser = createAsyncThunk(
     }
 );
 
+// Create User
+export const createUser = createAsyncThunk(
+    'admin/createUser',
+    async (userData, { rejectWithValue }) => {
+        try {
+            const response = await axios.post('http://localhost:3000/api/admin/users', userData, { withCredentials: true });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data.message);
+        }
+    }
+);
+
 // Delete User
 export const deleteUser = createAsyncThunk(
     'admin/deleteUser',
@@ -114,6 +127,19 @@ const adminSlice = createSlice({
                 state.error = null;
             })
             .addCase(editUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // Add user
+            .addCase(createUser.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(createUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users.push(action.payload);
+                state.error = null;
+            })
+            .addCase(createUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             })

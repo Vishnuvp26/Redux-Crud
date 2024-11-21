@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, logoutAdmin, editUser, deleteUser } from '../../../features/adminSlice';
+import { getAllUsers, logoutAdmin, editUser, deleteUser, createUser } from '../../../features/adminSlice';
 import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
@@ -9,8 +9,10 @@ const AdminDashboard = () => {
     const { users, loading, error, adminInfo } = useSelector((state) => state.admin);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [editedUser, setEditedUser] = useState({ name: '', email: '' });
+    const [newUser, setNewUser] = useState({ name: '', email: '', password: '' });
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -48,6 +50,21 @@ const AdminDashboard = () => {
         setEditedUser((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleAddInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewUser((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddUser = () => {
+        if (!newUser.name || !newUser.email || !newUser.password) {
+            alert('All fields are required.');
+            return;
+        }
+        dispatch(createUser(newUser));
+        setIsAddModalOpen(false);
+        setNewUser({ name: '', email: '', password: '' });
+    };
+
     const filteredUsers = users.filter((user) =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -56,22 +73,40 @@ const AdminDashboard = () => {
     return (
         <div className="p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900 min-h-screen">
             <header className="flex justify-between items-center mb-8">
+                
+                <div className="relative w-65">
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-800 hover:text-gray-700 font-bold"
+                        >
+                            &times;
+                        </button>
+                    )}
+                </div>
+
                 <h1 className="text-2xl font-bold text-gray-300">Admin Dashboard</h1>
-                <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-65 px-4 py-2 border border-gray-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-                {searchTerm && (
+                <div className="flex justify-end space-x-4">
                     <button
-                        onClick={() => setSearchTerm('')}
-                        className="absolute right-2 top-[2.4em] mr-8 text-gray-800 hover:text-gray-700 font-bold"
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600"
                     >
-                        &times;
+                        Add User
                     </button>
-                )}
+                    <button
+                        onClick={handleLogout}
+                        className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600"
+                    >
+                        Logout
+                    </button>
+                </div>
             </header>
 
             {loading && <p>Loading...</p>}
@@ -119,19 +154,12 @@ const AdminDashboard = () => {
                                 </td>
                             </tr>
                         ))}
-                        <button
-                            onClick={handleLogout}
-                            className="absolute bottom-2 right-2 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600"
-                        >
-                        Logout
-                        </button>
                     </tbody>
                 </table>
-                
             ) : (
                 <p className="text-center text-white text-lg mt-4 pt-56">No users found.</p>
             )}
-            
+
             {isModalOpen && (
                 <div
                     id="editUserModal"
@@ -143,9 +171,7 @@ const AdminDashboard = () => {
                         </header>
                         <div className="p-4">
                             <div className="mb-4">
-                                <label className="block text-gray-700 font-medium mb-2">
-                                    Name
-                                </label>
+                                <label className="block text-gray-700 font-medium mb-2">Name</label>
                                 <input
                                     type="text"
                                     name="name"
@@ -155,9 +181,7 @@ const AdminDashboard = () => {
                                 />
                             </div>
                             <div className="mb-4">
-                                <label className="block text-gray-700 font-medium mb-2">
-                                    Email
-                                </label>
+                                <label className="block text-gray-700 font-medium mb-2">Email</label>
                                 <input
                                     type="email"
                                     name="email"
@@ -179,6 +203,65 @@ const AdminDashboard = () => {
                                 className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600"
                             >
                                 Save Changes
+                            </button>
+                        </footer>
+                    </div>
+                </div>
+            )}
+
+            {isAddModalOpen && (
+                <div
+                    id="addUserModal"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                >
+                    <div className="bg-white rounded-lg shadow-lg w-1/3">
+                        <header className="px-4 py-2 bg-gray-200 border-b rounded-t-lg">
+                            <h2 className="text-lg font-bold">Add New User</h2>
+                        </header>
+                        <div className="p-4">
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={newUser.name}
+                                    onChange={handleAddInputChange}
+                                    className="w-full border border-gray-300 px-4 py-2 rounded-lg"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={newUser.email}
+                                    onChange={handleAddInputChange}
+                                    className="w-full border border-gray-300 px-4 py-2 rounded-lg"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Password</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={newUser.password}
+                                    onChange={handleAddInputChange}
+                                    className="w-full border border-gray-300 px-4 py-2 rounded-lg"
+                                />
+                            </div>
+                        </div>
+                        <footer className="flex justify-end p-4 border-t bg-gray-200 rounded-b-lg">
+                            <button
+                                onClick={() => setIsAddModalOpen(false)}
+                                className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 mr-2"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAddUser}
+                                className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+                            >
+                                Add User
                             </button>
                         </footer>
                     </div>
