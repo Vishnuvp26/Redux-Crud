@@ -5,9 +5,9 @@ const protect = async (req, res, next) => {
     let token;
     try {
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-            token = req.headers.authorization.split(" ")[1]; // Extract token from Authorization header
+            token = req.headers.authorization.split(" ")[1];
         } else if (req.cookies && req.cookies.jwt) {
-            token = req.cookies.jwt; // Extract token from cookies
+            token = req.cookies.jwt;
         }
 
         if (!token) {
@@ -16,7 +16,6 @@ const protect = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Attach the user information to the request object
         req.user = await User.findById(decoded.id).select("-password");
 
         if (!req.user) {
